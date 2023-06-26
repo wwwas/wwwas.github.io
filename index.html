@@ -2,63 +2,51 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Chat with 3D Virtual Host</title>
-  <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+  <title>Chat with Virtual Person</title>
 </head>
 <body>
-  <a-scene>
-    <a-assets>
-      <a-asset-item id="host-obj" src="host.obj"></a-asset-item>
-      <a-asset-item id="host-mtl" src="host.mtl"></a-asset-item>
-    </a-assets>
-    
-    <a-entity gltf-model="#host-obj" mtl="#host-mtl"
-      position="0 0 -3" scale="0.2 0.2 0.2">
-    </a-entity>
-  </a-scene>
-  
   <div id="chatbox">
     <div id="messages"></div>
     <input id="input" autocomplete="off">
   </div>
   
   <script>
-    // 3D模型和纹理
-    const HOST_OBJ = '#host-obj';
-    const HOST_MTL = '#host-mtl';
-    
-    // 语音识别
-    const SpeechRecognition = window.SpeechRecognition || 
-                             window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    
-    // 虚拟主播 
-    const host = {
-      speak(msg) {
-        // 使用Web Speech API合成语音
-        const speech = new SpeechSynthesisUtterance(msg);
-        speech.lang = 'en-US';
-        window.speechSynthesis.speak(speech);
-      } 
+    const chatbot = {
+      name: 'Clara',
+      greet() {
+        return 'Hello! My name is Clara.';
+      },
+      chat(msg) {
+        if (msg === 'Hello') return this.greet();
+        else if (msg === 'How are you?') return 'I\'m doing well, thanks!';
+        else return 'Sorry, I don\'t understand.';
+      }
     };
     
-    // 显示消息
     function showMessage(username, msg) {
-      // ... 同前
+      const messages = document.getElementById('messages');
+      messages.innerHTML += 
+        '<b>' + username + ': </b>' + msg + '<br>';
     }
     
-    recognition.onresult = (e) => {
-      let result = e.results[0][0].transcript;
-      showMessage('You', result);
-      host.speak('Hello, I can hear you!');
+    function getMessage() {
+      const input = document.getElementById('input');
+      const msg = input.value;
+      input.value = '';
+      return msg;
     }
     
-    // 按下输入框绑定语音识别
-    document.getElementById('input').addEventListener('click', () => {
-      recognition.start();
+    function chat() {
+      let msg = getMessage();
+      if (msg !== '') {
+        showMessage('You', msg);
+        const response = chatbot.chat(msg);
+        showMessage(chatbot.name, response);
+      }
+    }
+    
+    document.getElementById('input').addEventListener('keyup', (e) => {
+      if (e.keyCode === 13) chat();
     });
   </script>
 </body>
