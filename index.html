@@ -2,52 +2,34 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Chat with Virtual Person</title>
+  <title>Access Android Camera</title>
 </head>
 <body>
-  <div id="chatbox">
-    <div id="messages"></div>
-    <input id="input" autocomplete="off">
-  </div>
+  <video id="video" autoplay></video>
   
   <script>
-    const chatbot = {
-      name: 'Clara',
-      greet() {
-        return 'Hello! My name is Clara.';
-      },
-      chat(msg) {
-        if (msg === 'Hello') return this.greet();
-        else if (msg === 'How are you?') return 'I\'m doing well, thanks!';
-        else return 'Sorry, I don\'t understand.';
-      }
-    };
+    // 获取视频流
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        const video = document.querySelector('video');
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        console.log(err);
+      });
     
-    function showMessage(username, msg) {
-      const messages = document.getElementById('messages');
-      messages.innerHTML += 
-        '<b>' + username + ': </b>' + msg + '<br>';
+    // 检测是否支持 Promise
+    const promise = navigator.mediaDevices.getUserMedia({video: true});
+    if (promise !== undefined) {
+      promise.then(stream => { /* ... */ })
+           .catch(err => { /* handle error */ });
+    } else {
+      // 不支持Promise,使用回调函数
+      navigator.mediaDevices.getUserMedia({video: true}, 
+        function(stream) { /* ... */ },
+        function(err) { /* handle error */ }
+      );
     }
-    
-    function getMessage() {
-      const input = document.getElementById('input');
-      const msg = input.value;
-      input.value = '';
-      return msg;
-    }
-    
-    function chat() {
-      let msg = getMessage();
-      if (msg !== '') {
-        showMessage('You', msg);
-        const response = chatbot.chat(msg);
-        showMessage(chatbot.name, response);
-      }
-    }
-    
-    document.getElementById('input').addEventListener('keyup', (e) => {
-      if (e.keyCode === 13) chat();
-    });
   </script>
 </body>
 </html>
