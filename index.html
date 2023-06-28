@@ -2,34 +2,60 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Access Android Camera</title>
+  <title>Chat with 2D Virtual Host</title>
+  <style>
+    .host {
+      width: 200px;
+      height: 200px;
+      background: url(host.png);
+      background-size: contain; 
+    }
+  </style>
 </head>
 <body>
-  <video id="video" autoplay></video>
+  <div class="host"></div>
+  
+  <div id="chatbox">
+    <div id="messages"></div>
+    <button id="mic-button">Enable Mic</button>
+  </div>
   
   <script>
-    // 获取视频流
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        const video = document.querySelector('video');
-        video.srcObject = stream;
-      })
-      .catch(err => {
-        console.log(err);
-      });
-    
-    // 检测是否支持 Promise
-    const promise = navigator.mediaDevices.getUserMedia({video: true});
-    if (promise !== undefined) {
-      promise.then(stream => { /* ... */ })
-           .catch(err => { /* handle error */ });
-    } else {
-      // 不支持Promise,使用回调函数
-      navigator.mediaDevices.getUserMedia({video: true}, 
-        function(stream) { /* ... */ },
-        function(err) { /* handle error */ }
-      );
+    // 请求麦克风权限
+    function requestMicPermission() {
+      // ... 同前
     }
+    requestMicPermission();
+    
+    // 2D主播
+    const host = {
+      speak(msg) {
+        // 合成语音
+        const speech = new SpeechSynthesisUtterance(msg);
+        speech.lang = 'en-US';
+        window.speechSynthesis.speak(speech);
+      }
+    };
+    
+    // 语音识别
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (e) => {
+      let result = e.results[0][0].transcript;
+      showMessage('You', result);
+      host.speak('Hello, I can hear you!');
+      recognition.stop();
+    };
+    
+    // 当用户点击授权按钮时
+    document.querySelector('#mic-button').addEventListener('click', () => {
+      recognition.start();  // 开始语音识别,时长3秒
+      setTimeout(() => recognition.stop(), 3000);
+      document.querySelector('#mic-button').style.display = 'none';
+    });
   </script>
 </body>
 </html>
