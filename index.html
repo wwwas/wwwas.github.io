@@ -18,26 +18,41 @@
   <div id="chatbox">
     <div id="messages"></div>
     <button id="mic-button">Enable Mic</button>
+    <input id="input" autocomplete="off">
   </div>
-  <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=SpeechRecognition"></script>
+  
   <script>
+    // 检测Speech Recognition支持
+    if ('SpeechRecognition' in window) {
+      var recognition = new SpeechRecognition();
+    } else {
+      document.querySelector('#mic-button').style.display = 'none';
+      var input = document.getElementById('input');
+      input.addEventListener('keyup', (e) => {
+        if (e.keyCode === 13) {
+          let msg = input.value;
+          showMessage('You', msg);
+          input.value = '';
+        }
+      });
+    }
+    
     // 请求麦克风权限
     function requestMicPermission() {
       navigator.permissions.query({ name: 'microphone' }).then(result => {
         if (result.state === 'granted') {
-          // 已获得权限,可以开始语音识别
+          recognition.start(); 
+          document.querySelector('#mic-button').style.display = 'none';
         } else {
-          // 未获得权限,提供按钮让用户授权
           document.querySelector('#mic-button').style.display = 'block';
+        }
+      });
     }
-  });
-}
     requestMicPermission();
     
     // 2D主播
     const host = {
       speak(msg) {
-        // 合成语音
         const speech = new SpeechSynthesisUtterance(msg);
         speech.lang = 'en-US';
         window.speechSynthesis.speak(speech);
@@ -45,7 +60,6 @@
     };
     
     // 语音识别
-    const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -57,12 +71,18 @@
       recognition.stop();
     };
     
-    // 当用户点击授权按钮时
     document.querySelector('#mic-button').addEventListener('click', () => {
-      recognition.start();  // 开始语音识别,时长3秒
+      recognition.start();  
       setTimeout(() => recognition.stop(), 3000);
       document.querySelector('#mic-button').style.display = 'none';
     });
+    
+    function showMessage(username, msg) {
+      const messages = document.getElementById('messages');
+      messages.innerHTML += 
+        '<b>' + username + ': </b>' + msg + '<br>';
+      messages.scrollTop = messages.scrollHeight;
+    }
   </script>
 </body>
 </html>
