@@ -23,8 +23,15 @@
   <script>
     // 请求麦克风权限
     function requestMicPermission() {
-      // ... 同前
+      navigator.permissions.query({ name: 'microphone' }).then(result => {
+        if (result.state === 'granted') {
+          // 已获得权限,可以开始语音识别
+        } else {
+          // 未获得权限,提供按钮让用户授权
+          document.querySelector('#mic-button').style.display = 'block';
     }
+  });
+}
     requestMicPermission();
     
     // 2D主播
