@@ -1,89 +1,54 @@
-htmlhtml
+html
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Chat with 2D Virtual Host</title>
-  <style>
-    .host {
-      width: 200px;
-      height: 200px;
-      background: url(host.png);
-      background-size: contain; 
-    }
-  </style>
+  <title>Chat with Virtual Person</title>
 </head>
 <body>
-  <div class="host"></div>
-  
   <div id="chatbox">
     <div id="messages"></div>
-    <button id="mic-button">Enable Mic</button>
     <input id="input" autocomplete="off">
   </div>
   
   <script>
-    // 检测Speech Recognition支持
-    if ('SpeechRecognition' in window) {
-      var recognition = new SpeechRecognition();
-    } else {
-      document.querySelector('#mic-button').style.display = 'none';
-      var input = document.getElementById('input');
-      input.addEventListener('keyup', (e) => {
-        if (e.keyCode === 13) {
-          let msg = input.value;
-          showMessage('You', msg);
-          input.value = '';
-        }
-      });
-    }
-    
-    // 请求麦克风权限
-    function requestMicPermission() {
-      navigator.permissions.query({ name: 'microphone' }).then(result => {
-        if (result.state === 'granted') {
-          recognition.start(); 
-          document.querySelector('#mic-button').style.display = 'none';
-        } else {
-          document.querySelector('#mic-button').style.display = 'block';
-        }
-      });
-    }
-    requestMicPermission();
-    
-    // 2D主播
-    const host = {
-      speak(msg) {
-        const speech = new SpeechSynthesisUtterance(msg);
-        speech.lang = 'en-US';
-        window.speechSynthesis.speak(speech);
+    const chatbot = {
+      name: 'Clara',
+      greet() {
+        return 'Hello! My name is Clara.';
+      },
+      chat(msg) {
+        if (msg === 'Hello') return this.greet();
+        else if (msg === 'How are you?') return 'I\'m doing well, thanks!';
+        else return 'Sorry, I don\'t understand.';
       }
     };
-    
-    // 语音识别
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-    recognition.onresult = (e) => {
-      let result = e.results[0][0].transcript;
-      showMessage('You', result);
-      host.speak('Hello, I can hear you!');
-      recognition.stop();
-    };
-    
-    document.querySelector('#mic-button').addEventListener('click', () => {
-      recognition.start();  
-      setTimeout(() => recognition.stop(), 3000);
-      document.querySelector('#mic-button').style.display = 'none';
-    });
     
     function showMessage(username, msg) {
       const messages = document.getElementById('messages');
       messages.innerHTML += 
         '<b>' + username + ': </b>' + msg + '<br>';
-      messages.scrollTop = messages.scrollHeight;
     }
+    
+    function getMessage() {
+      const input = document.getElementById('input');
+      const msg = input.value;
+      input.value = '';
+      return msg;
+    }
+    
+    function chat() {
+      let msg = getMessage();
+      if (msg !== '') {
+        showMessage('You', msg);
+        const response = chatbot.chat(msg);
+        showMessage(chatbot.name, response);
+      }
+    }
+    
+    document.getElementById('input').addEventListener('keyup', (e) => {
+      if (e.keyCode === 13) chat();
+    });
   </script>
 </body>
 </html>
